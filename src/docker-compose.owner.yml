@@ -1,0 +1,27 @@
+services:
+  owner:
+    build: owner
+    ports:
+      - "8046:8080" # Maps port 8080 on the host to port 8080 in the container
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/owner
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - JAVA_OPTS=-Xmx1g -Xms512m
+    restart: unless-stopped
+  db:
+    image: postgres:14 # Use Postgres version 14
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-owner:/var/lib/postgresql/owner # Persist database data
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=owner
+    restart: unless-stopped
+
+volumes:
+  pgdata-owner: # Named volume for Postgres data

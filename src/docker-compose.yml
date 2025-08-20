@@ -1,0 +1,89 @@
+services:
+  # Database PostgreSQL
+  db:
+    image: postgres:14
+    container_name: postgres-unified
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-jetly:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=postgres
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Customer
+  customer-app:
+    build:
+      context: ./customer
+    container_name: customer-service
+    ports:
+      - "8045:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/customer
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - JAVA_OPTS=-Xmx1g -Xms512m
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Owner
+  owner-app:
+    build:
+      context: ./owner
+    container_name: owner-service
+    ports:
+      - "8046:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/owner
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - JAVA_OPTS=-Xmx1g -Xms512m
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Flight
+  flight-app:
+    build:
+      context: ./flight
+    container_name: flight-service
+    ports:
+      - "8047:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flight
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - JAVA_OPTS=-Xmx1g -Xms512m
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # Optimization
+  optimization-app:
+    build:
+      context: ./optimization
+    container_name: optimization-service
+    ports:
+      - "8048:8000"
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  pgdata-jetly:
+
+networks:
+  app-network:
+    driver: bridge

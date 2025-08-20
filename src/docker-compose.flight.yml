@@ -1,0 +1,27 @@
+services:
+  flight:
+    build: flight
+    ports:
+      - "8047:8080" # Maps port 8080 on the host to port 8080 in the container
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/flight
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - JAVA_OPTS=-Xmx2g -Xms1g
+    restart: unless-stopped
+  db:
+    image: postgres:14 # Use Postgres version 14
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-flight:/var/lib/postgresql/flight # Persist database data
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=flight
+    restart: unless-stopped
+
+volumes:
+  pgdata-flight: # Named volume for Postgres data

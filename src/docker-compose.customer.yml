@@ -1,0 +1,27 @@
+services:
+  customer:
+    build: customer
+    ports:
+      - "8045:8080" # Maps port 8080 on the host to port 8080 in the container
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/customer
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - JAVA_OPTS=-Xmx1g -Xms512m
+    restart: unless-stopped
+  db:
+    image: postgres:14 # Use Postgres version 14
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata-customer:/var/lib/postgresql/customer # Persist database data
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=customer
+    restart: unless-stopped
+
+volumes:
+  pgdata-customer: # Named volume for Postgres data

@@ -1,0 +1,6 @@
+services:
+  optimization:
+    build: optimization
+    ports:
+      - "8048:8000" # Maps port 8051 on the host to port 8000 in the container
+    restart: unless-stopped
